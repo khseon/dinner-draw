@@ -2,37 +2,49 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>오늘 저녁 뭐 먹지?</title>
 
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
+        margin: 0;
+        min-height: 100vh;
         text-align: center;
-        background: #fff4df;
-        font-family: sans-serif;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #fff3d6, #ffe0b2);
+        overflow: hidden;
+        transition: 0.4s;
     }
 
     h1 {
         margin-top: 50px;
-        color: #ff6b35;
+        color: #ff6333;
+        font-size: 32px;
     }
 
-    p {
-        font-size: 18px;
+    .subtitle {
+        color: #777;
+        font-size: 17px;
     }
 
+    /* 카드 */
     .card {
         width: 280px;
         height: 380px;
-        margin: 40px auto;
+        margin: 40px auto 25px;
         cursor: pointer;
-        perspective: 1000px;
+        perspective: 1200px;
     }
 
     .card-inner {
         width: 100%;
         height: 100%;
         position: relative;
-        transition: transform 0.6s;
+        transition: transform 0.7s;
         transform-style: preserve-3d;
     }
 
@@ -40,180 +52,511 @@
         transform: rotateY(180deg);
     }
 
-    .front, .back {
+    .front,
+    .back {
         position: absolute;
         width: 100%;
         height: 100%;
-        border-radius: 25px;
+        border-radius: 28px;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
         backface-visibility: hidden;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        box-sizing: border-box;
-        padding: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
     }
 
+    /* 앞면 */
     .front {
-        background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+        background: linear-gradient(135deg, #ff4d6d, #ff9f43);
         color: white;
-        font-size: 32px;
+        font-size: 30px;
         font-weight: bold;
     }
 
-    .front span {
-        font-size: 70px;
+    .front .big {
+        font-size: 85px;
         margin-bottom: 20px;
+        animation: bounce 1.5s infinite;
     }
 
+    /* 뒷면 */
     .back {
         background: white;
         color: #333;
         transform: rotateY(180deg);
+        padding: 25px;
     }
 
-    .back .emoji {
-        font-size: 80px;
+    .emoji {
+        font-size: 85px;
         margin-bottom: 20px;
     }
 
-    .back .menu {
-        font-size: 30px;
+    .menu {
+        font-size: 32px;
         font-weight: bold;
-        color: #ff6b35;
+        color: #ff6333;
     }
 
-    .back .comment {
-        margin-top: 15px;
+    .comment {
+        margin-top: 18px;
         font-size: 16px;
         color: #777;
+        line-height: 1.5;
     }
 
     .hint {
         color: #888;
         font-size: 14px;
     }
+
+    /* 앞면 살짝 통통 */
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* 두근두근 */
+    .heartbeat {
+        animation: heartbeat 0.25s infinite alternate;
+    }
+
+    @keyframes heartbeat {
+        from {
+            transform: scale(1);
+        }
+
+        to {
+            transform: scale(1.08);
+        }
+    }
+
+    /* 카드 흔들기 */
+    .shake {
+        animation: shake 0.5s;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-15px) rotate(-3deg); }
+        40% { transform: translateX(15px) rotate(3deg); }
+        60% { transform: translateX(-10px) rotate(-2deg); }
+        80% { transform: translateX(10px) rotate(2deg); }
+    }
+
+    /* 다시 뽑기 */
+    .spin {
+        animation: spin 0.8s;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg) scale(1);
+        }
+
+        50% {
+            transform: rotate(180deg) scale(0.7);
+        }
+
+        100% {
+            transform: rotate(360deg) scale(1);
+        }
+    }
+
+    /* 굶기 */
+    body.hungry {
+        background: #171717;
+        color: white;
+    }
+
+    body.hungry h1,
+    body.hungry .subtitle,
+    body.hungry .hint {
+        color: white;
+    }
+
+    body.hungry .card {
+        animation: shake 0.5s infinite;
+    }
+
+    /* 파티클 */
+    .particle {
+        position: fixed;
+        top: -30px;
+        font-size: 25px;
+        pointer-events: none;
+        animation: fall 2.5s linear forwards;
+        z-index: 100;
+    }
+
+    @keyframes fall {
+        from {
+            transform: translateY(0) rotate(0deg);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateY(110vh) rotate(720deg);
+            opacity: 0;
+        }
+    }
+
 </style>
 </head>
 
 <body>
 
-<h1>🍽️ 오늘 저녁 뭐 먹지? feat.801호</h1>
+<h1>🍽️ 오늘 저녁 뭐 먹지?</h1>
 
-<p>고민하지 말고 카드를 뽑아보시오</p>
+<p class="subtitle">운명에 맡겨보세요...</p>
 
-<div class="card" onclick="drawMenu()" id="card">
+<div class="card" id="card" onclick="drawMenu()">
 
     <div class="card-inner">
 
         <!-- 카드 앞면 -->
         <div class="front">
-            <span>🎴</span>
+            <div class="big">🎴</div>
             오늘의<br>저녁 메뉴
         </div>
 
         <!-- 카드 뒷면 -->
         <div class="back">
+
             <div class="emoji" id="emoji">🍚</div>
-            <div class="menu" id="menu">메뉴</div>
-            <div class="comment" id="comment">오늘은 이거다!</div>
+
+            <div class="menu" id="menu">
+                메뉴
+            </div>
+
+            <div class="comment" id="comment">
+                오늘은 이거다!
+            </div>
+
         </div>
 
     </div>
 
 </div>
 
-<p class="hint">👆 카드를 누르거라~ 다시 누르면 리셋~</p>
+<p class="hint">
+    👆 카드를 눌러 운명을 확인하세요
+</p>
+
+<p class="hint">
+    다시 누르면 새로운 메뉴를 뽑습니다
+</p>
 
 
 <script>
 
 const menus = [
+
     {
         name: "치킨",
         emoji: "🍗",
-        comment: "마트치킨/보드람/잉치킨"
+        comment: "오늘은 치킨이다. 반박은 받지 않습니다.",
+        type: "party"
     },
+
     {
         name: "피자",
         emoji: "🍕",
-        comment: "오지고지리는피자"
+        comment: "콜라까지 시키면 완벽합니다.",
+        type: "party"
     },
+
     {
         name: "삼겹살",
         emoji: "🥓",
-        comment: "소,돼지 다 가능"
+        comment: "오늘은 고기 먹는 날!",
+        type: "party"
     },
+
     {
         name: "떡볶이",
         emoji: "🌶️",
-        comment: "분식류"
+        comment: "맵지만 맛있으면 됐죠.",
+        type: "normal"
     },
+
     {
         name: "초밥",
         emoji: "🍣",
-        comment: "당산 회전초밥"
+        comment: "오늘은 고급스럽게 가봅니다.",
+        type: "party"
     },
+
     {
         name: "햄버거",
         emoji: "🍔",
-        comment: "롯데리아 얼마전에 먹긴함"
+        comment: "감자튀김도 잊지 마세요.",
+        type: "party"
     },
+
+    {
+        name: "라면",
+        emoji: "🍜",
+        comment: "귀찮을 땐 역시 라면.",
+        type: "normal"
+    },
+
+    {
+        name: "김치찌개",
+        emoji: "🍲",
+        comment: "밥 두 공기 각입니다.",
+        type: "normal"
+    },
+
+    {
+        name: "돈까스",
+        emoji: "🥩",
+        comment: "바삭함이 필요한 날.",
+        type: "party"
+    },
+
+    {
+        name: "냉면",
+        emoji: "🍜",
+        comment: "시원하게 한 그릇 갑시다.",
+        type: "normal"
+    },
+
     {
         name: "족발",
         emoji: "🍖",
-        comment: "배달시켜야겠지?"
+        comment: "오늘은 야식까지 책임집니다.",
+        type: "party"
     },
+
     {
-        name: "곱창or막창",
-        emoji: "🥓",
-        comment: "생곱창or대구막창"
+        name: "국밥",
+        emoji: "🍲",
+        comment: "역시 든든한 국밥.",
+        type: "normal"
     },
+
     {
-        name: "쭈꾸미&닭발",
+        name: "파스타",
+        emoji: "🍝",
+        comment: "오늘은 분위기 있게!",
+        type: "party"
+    },
+
+    {
+        name: "닭발",
         emoji: "🌶️",
-        comment: "혓바닥,구내염나긴함"
+        comment: "매운맛으로 스트레스 날려버리기!",
+        type: "normal"
     },
+
     {
-        name: "다시뽑기",
-		emoji: "🔄",
-        comment: "의견을 주어도 좋음"
+        name: "김밥",
+        emoji: "🍙",
+        comment: "간단하지만 맛있습니다.",
+        type: "normal"
+    },
+
+    /* 특별 메뉴 */
+
+    {
+        name: "다시 뽑기",
+        emoji: "🔄",
+        comment: "마음에 안 들죠? 한 번 더 뽑아봅시다.",
+        type: "retry"
+    },
+
+    {
+        name: "굶기",
+        emoji: "💀",
+        comment: "오늘은... 그냥 굶습니다.",
+        type: "hungry"
     }
+
 ];
 
+
 let isOpen = false;
+let busy = false;
+
 
 function drawMenu() {
 
+    if (busy) return;
+
     const card = document.getElementById("card");
+    const body = document.body;
 
-    // 카드가 이미 열려 있다면 닫기
-    if (isOpen) {
-        card.classList.remove("open");
-        isOpen = false;
+    /* 굶기 효과 초기화 */
+    body.classList.remove("hungry");
 
-        // 잠깐 기다렸다가 새로운 메뉴 준비
+    /* 처음 뽑기 */
+    if (!isOpen) {
+
+        busy = true;
+
+        /* 두근두근 */
+        card.classList.add("heartbeat");
+
         setTimeout(() => {
-            showRandomMenu();
-        }, 300);
 
-    } else {
-        // 처음 누르면 랜덤 메뉴 보여주기
-        showRandomMenu();
-        card.classList.add("open");
-        isOpen = true;
+            card.classList.remove("heartbeat");
+
+            showRandomMenu();
+
+            card.classList.add("open");
+
+            isOpen = true;
+            busy = false;
+
+        }, 900);
+
     }
+
+    /* 이미 열린 상태 */
+    else {
+
+        busy = true;
+
+        /* 카드 닫기 */
+        card.classList.remove("open");
+
+        setTimeout(() => {
+
+            showRandomMenu();
+
+            card.classList.add("open");
+
+            isOpen = true;
+            busy = false;
+
+        }, 500);
+
+    }
+
 }
+
 
 function showRandomMenu() {
 
-    const randomIndex = Math.floor(Math.random() * menus.length);
+    const randomIndex =
+        Math.floor(Math.random() * menus.length);
+
     const selected = menus[randomIndex];
 
-    document.getElementById("emoji").innerText = selected.emoji;
-    document.getElementById("menu").innerText = selected.name;
-    document.getElementById("comment").innerText = selected.comment;
+    document.getElementById("emoji").innerText =
+        selected.emoji;
+
+    document.getElementById("menu").innerText =
+        selected.name;
+
+    document.getElementById("comment").innerText =
+        selected.comment;
+
+
+    /* 특별 효과 */
+
+    if (selected.type === "party") {
+
+        partyEffect();
+
+    }
+
+    if (selected.type === "hungry") {
+
+        hungryEffect();
+
+    }
+
+    if (selected.type === "retry") {
+
+        retryEffect();
+
+    }
+
+}
+
+
+/* 🎉 당첨 효과 */
+
+function partyEffect() {
+
+    const emojis = [
+        "🎉",
+        "✨",
+        "🎊",
+        "🍗",
+        "🍕",
+        "❤️"
+    ];
+
+    for (let i = 0; i < 35; i++) {
+
+        const particle =
+            document.createElement("div");
+
+        particle.className = "particle";
+
+        particle.innerText =
+            emojis[Math.floor(Math.random() * emojis.length)];
+
+        particle.style.left =
+            Math.random() * 100 + "vw";
+
+        particle.style.animationDuration =
+            (1.5 + Math.random() * 2) + "s";
+
+        document.body.appendChild(particle);
+
+        setTimeout(() => {
+            particle.remove();
+        }, 4000);
+    }
+
+}
+
+
+/* 💀 굶기 효과 */
+
+function hungryEffect() {
+
+    document.body.classList.add("hungry");
+
+    const card =
+        document.getElementById("card");
+
+    card.classList.add("shake");
+
+    setTimeout(() => {
+
+        card.classList.remove("shake");
+
+    }, 600);
+
+}
+
+
+/* 🔄 다시 뽑기 효과 */
+
+function retryEffect() {
+
+    const card =
+        document.getElementById("card");
+
+    card.classList.add("spin");
+
+    setTimeout(() => {
+
+        card.classList.remove("spin");
+
+    }, 800);
+
 }
 
 </script>
