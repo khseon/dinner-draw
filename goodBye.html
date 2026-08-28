@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>퇴근 승인 시스템</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: Arial, sans-serif;
+
+    background:
+        radial-gradient(circle at 20% 20%, #dff6ff 0%, transparent 35%),
+        radial-gradient(circle at 80% 80%, #8ed8ff 0%, transparent 40%),
+        linear-gradient(135deg, #5bbce8, #9ee4ff);
+
+    color: #234;
+
+    overflow: hidden;
+}
+
+
+/* =========================
+   컴퓨터 모니터
+========================= */
+
+.monitor {
+    width: 700px;
+    max-width: 92vw;
+
+    background: #e9edf2;
+
+    border-radius: 18px;
+
+    padding: 18px;
+
+    box-shadow:
+        0 25px 60px rgba(0, 70, 110, 0.3);
+}
+
+
+/* 화면 */
+
+.screen {
+    position: relative;
+
+    height: 500px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf9ff,
+            #ccefff
+        );
+
+    overflow: hidden;
+
+    padding: 35px;
+}
+
+
+/* 모니터 아래 받침 */
+
+.stand {
+    width: 120px;
+    height: 25px;
+
+    margin: 0 auto;
+
+    background: #c7cdd3;
+
+    border-radius: 0 0 10px 10px;
+}
+
+.base {
+    width: 220px;
+    height: 15px;
+
+    margin: 0 auto;
+
+    background: #c7cdd3;
+
+    border-radius: 20px;
+}
+
+
+/* =========================
+   상단 시스템 표시
+========================= */
+
+.system-bar {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    color: #52758a;
+
+    font-size: 13px;
+
+    margin-bottom: 35px;
+}
+
+.status {
+    color: #25a66f;
+
+    font-weight: bold;
+}
+
+
+/* =========================
+   제목
+========================= */
+
+h1 {
+    margin: 0;
+
+    font-size: 34px;
+
+    color: #236b91;
+}
+
+.subtitle {
+    margin-top: 10px;
+
+    color: #62879b;
+
+    font-size: 16px;
+}
+
+
+/* =========================
+   퇴근 카운트다운
+========================= */
+
+.countdown-box {
+    margin: 25px auto;
+
+    width: 330px;
+
+    padding: 15px;
+
+    background: rgba(255,255,255,0.7);
+
+    border: 1px solid rgba(80,160,200,0.2);
+
+    border-radius: 12px;
+}
+
+.countdown-label {
+    font-size: 13px;
+
+    color: #6a8c9d;
+
+    margin-bottom: 5px;
+}
+
+#countdown {
+    font-size: 38px;
+
+    font-weight: bold;
+
+    color: #267da8;
+
+    letter-spacing: 3px;
+}
+
+
+/* =========================
+   버튼
+========================= */
+
+button {
+    width: 160px;
+    height: 60px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 7px 15px rgba(0,0,0,0.15);
+}
+
+
+/* 퇴근 */
+
+#leave {
+    position: fixed;
+
+    background: #ff719f;
+
+    color: white;
+
+    z-index: 20;
+
+    transition:
+        left 0.12s ease,
+        top 0.12s ease,
+        transform 0.12s ease;
+}
+
+#leave.running {
+    transform:
+        scale(1.1)
+        rotate(-5deg);
+}
+
+
+/* 야근 */
+
+#work {
+    position: fixed;
+
+    background: white;
+
+    color: #397899;
+
+    z-index: 10;
+}
+
+
+/* =========================
+   메시지
+========================= */
+
+#message {
+
+    margin-top: 25px;
+
+    min-height: 30px;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    color: #4f7588;
+}
+
+
+/* =========================
+   퇴근 성공 화면
+========================= */
+
+#ending {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            135deg,
+            #55bfe9,
+            #a9e8ff
+        );
+
+    z-index: 100;
+
+    color: white;
+
+    text-align: center;
+}
+
+#ending h2 {
+
+    font-size: 46px;
+
+    margin-bottom: 10px;
+
+    text-shadow:
+        0 3px 10px rgba(0,0,0,0.15);
+}
+
+#ending p {
+
+    font-size: 21px;
+
+    line-height: 1.7;
+}
+
+
+/* =========================
+   흔들림
+========================= */
+
+.shake {
+
+    animation: shake 0.3s;
+
+}
+
+@keyframes shake {
+
+    0%, 100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-8px);
+    }
+
+    75% {
+        transform: translateX(8px);
+    }
+
+}
+
+
+/* =========================
+   모바일
+========================= */
+
+@media (max-width: 600px) {
+
+    .screen {
+        height: 520px;
+        padding: 25px 15px;
+    }
+
+    h1 {
+        font-size: 27px;
+    }
+
+    .countdown-box {
+        width: 270px;
+    }
+
+    #countdown {
+        font-size: 30px;
+    }
+
+    button {
+        width: 140px;
+        height: 55px;
+        font-size: 16px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     컴퓨터
+========================= -->
+
+<div>
+
+    <div class="monitor">
+
+        <div class="screen">
+
+
+            <div class="system-bar">
+
+                <span>
+                    🖥️ COMPANY SYSTEM
+                </span>
+
+                <span class="status">
+                    ● ONLINE
+                </span>
+
+            </div>
+
+
+            <h1>
+                🏢 퇴근 승인 시스템
+            </h1>
+
+            <p class="subtitle">
+                오늘도 고생 많으셨습니다.
+            </p>
+
+
+            <!-- 카운트다운 -->
+
+            <div class="countdown-box">
+
+                <div class="countdown-label">
+                    정시 퇴근까지
+                </div>
+
+                <div id="countdown">
+                    계산 중...
+                </div>
+
+            </div>
+
+
+            <p>
+                퇴근을 신청하시겠습니까?
+            </p>
+
+
+            <div id="message">
+                현재 퇴근 신청이 진행 중입니다.
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+    <div class="stand"></div>
+
+    <div class="base"></div>
+
+</div>
+
+
+<!-- 퇴근 버튼 -->
+
+<button id="leave">
+    퇴근한다 🏃
+</button>
+
+
+<!-- 야근 버튼 -->
+
+<button id="work">
+    조금 더 일한다 💻
+</button>
+
+
+<!-- 퇴근 성공 -->
+
+<div id="ending">
+
+    <h2>
+        🎉 퇴근 승인 완료!
+    </h2>
+
+    <p>
+
+        오늘도 무사히 살아남았습니다.
+
+        <br><br>
+
+        퇴근 시간:
+        <span id="leaveTime"></span>
+
+        <br><br>
+
+        🏃💨💨💨
+
+    </p>
+
+</div>
+
+
+<script>
+
+
+const leave =
+    document.getElementById("leave");
+
+const work =
+    document.getElementById("work");
+
+const message =
+    document.getElementById("message");
+
+const countdown =
+    document.getElementById("countdown");
+
+const ending =
+    document.getElementById("ending");
+
+const leaveTime =
+    document.getElementById("leaveTime");
+
+
+/* =========================
+   퇴근 시간
+========================= */
+
+/*
+   여기 숫자만 바꾸면 됨.
+
+   18 = 오후 6시
+   30 = 오후 6시 30분
+*/
+
+const LEAVE_HOUR = 18;
+const LEAVE_MINUTE = 0;
+
+
+/* =========================
+   버튼 처음 위치
+========================= */
+
+function setInitialPosition() {
+
+    leave.style.left =
+        "calc(50% - 170px)";
+
+    leave.style.top =
+        "72%";
+
+
+    work.style.left =
+        "calc(50% + 10px)";
+
+    work.style.top =
+        "72%";
+
+}
+
+setInitialPosition();
+
+
+/* =========================
+   현재 시간이 퇴근시간인지
+========================= */
+
+function isAfterLeaveTime() {
+
+    const now =
+        new Date();
+
+    const leaveTime =
+        new Date();
+
+    leaveTime.setHours(
+        LEAVE_HOUR,
+        LEAVE_MINUTE,
+        0,
+        0
+    );
+
+    return now >= leaveTime;
+
+}
+
+
+/* =========================
+   카운트다운
+========================= */
+
+function updateCountdown() {
+
+    const now =
+        new Date();
+
+    const target =
+        new Date();
+
+    target.setHours(
+        LEAVE_HOUR,
+        LEAVE_MINUTE,
+        0,
+        0
+    );
+
+
+    /* 이미 퇴근시간 */
+
+    if (now >= target) {
+
+        countdown.innerText =
+            "00:00:00";
+
+        countdown.style.color =
+            "#25a66f";
+
+        message.innerText =
+            "🟢 퇴근 승인이 가능합니다.";
+
+        return;
+
+    }
+
+
+    const difference =
+        target - now;
+
+
+    const hours =
+        Math.floor(
+            difference / 1000 / 60 / 60
+        );
+
+
+    const minutes =
+        Math.floor(
+            difference / 1000 / 60
+        ) % 60;
+
+
+    const seconds =
+        Math.floor(
+            difference / 1000
+        ) % 60;
+
+
+    countdown.innerText =
+
+        String(hours).padStart(2, "0")
+        + ":" +
+
+        String(minutes).padStart(2, "0")
+        + ":" +
+
+        String(seconds).padStart(2, "0");
+
+
+    countdown.style.color =
+        "#267da8";
+
+}
+
+
+setInterval(
+    updateCountdown,
+    1000
+);
+
+updateCountdown();
+
+
+/* =========================
+   퇴근 버튼 도망
+========================= */
+
+function runAway() {
+
+
+    /* 퇴근시간 이후에는 도망 안 감 */
+
+    if (isAfterLeaveTime()) {
+
+        return;
+
+    }
+
+
+    const buttonWidth =
+        leave.offsetWidth;
+
+    const buttonHeight =
+        leave.offsetHeight;
+
+    const padding = 15;
+
+
+    const maxX =
+        window.innerWidth -
+        buttonWidth -
+        padding;
+
+    const maxY =
+        window.innerHeight -
+        buttonHeight -
+        padding;
+
+
+    const randomX =
+        Math.floor(
+            Math.random() * maxX
+        );
+
+    const randomY =
+        Math.floor(
+            Math.random() * maxY
+        );
+
+
+    leave.style.left =
+        randomX + "px";
+
+    leave.style.top =
+        randomY + "px";
+
+
+    const messages = [
+
+        "아직 퇴근시간 아닙니다. 😌",
+
+        "팀장님이 보고 계십니다 👀",
+
+        "어딜 가시려고요?",
+
+        "아직 5분 남았습니다.",
+
+        "ㅋㅋㅋㅋ 퇴근하고 싶죠?",
+
+        "그 버튼은 누를 수 없습니다.",
+
+        "오늘 할 일이 남았습니다.",
+
+        "메일 하나만 더 보내시죠.",
+
+        "회의 하나만 더 하고 가시죠.",
+
+        "퇴근은 정시에 가능합니다.",
+
+        "회사에서 조금만 더 함께하시죠.",
+
+        "퇴근 버튼이 마음에 안 드네요.",
+
+        "아직 업무가 종료되지 않았습니다.",
+
+        "잡아봐 😎"
+
+    ];
+
+
+    const randomMessage =
+        messages[
+            Math.floor(
+                Math.random() *
+                messages.length
+            )
+        ];
+
+
+    message.innerText =
+        randomMessage;
+
+
+    leave.classList.remove(
+        "running"
+    );
+
+    void leave.offsetWidth;
+
+    leave.classList.add(
+        "running"
+    );
+
+}
+
+
+/* =========================
+   마우스가 가까워지면 도망
+========================= */
+
+leave.addEventListener(
+    "mouseenter",
+    runAway
+);
+
+
+/* =========================
+   모바일
+========================= */
+
+leave.addEventListener(
+    "touchstart",
+    function(e) {
+
+        if (isAfterLeaveTime()) {
+            return;
+        }
+
+        e.preventDefault();
+
+        runAway();
+
+    }
+);
+
+
+/* =========================
+   퇴근 성공
+========================= */
+
+leave.addEventListener(
+    "click",
+    function() {
+
+        /* 아직 시간이 안 됐다면 */
+
+        if (!isAfterLeaveTime()) {
+
+            runAway();
+
+            return;
+
+        }
+
+
+        const now =
+            new Date();
+
+
+        leaveTime.innerText =
+            now.toLocaleTimeString(
+                "ko-KR",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+
+        ending.style.display =
+            "flex";
+
+    }
+);
+
+
+/* =========================
+   야근 버튼
+========================= */
+
+work.addEventListener(
+    "click",
+    function() {
+
+        const messages = [
+
+            "😌 훌륭한 직장인입니다.",
+
+            "💻 회사가 당신을 자랑스러워합니다.",
+
+            "📧 메일 하나만 더 보내시죠.",
+
+            "☕ 커피 한 잔 하고 계속합시다.",
+
+            "👏 역시 책임감이 대단하시네요.",
+
+            "😇 오늘도 회사에 충성!",
+
+            "📊 보고서도 작성해야죠.",
+
+            "🫡 명 받들겠습니다.",
+
+            "💀 그렇게 오늘도 야근을 합니다."
+
+        ];
+
+
+        const randomMessage =
+            messages[
+                Math.floor(
+                    Math.random() *
+                    messages.length
+                )
+            ];
+
+
+        message.innerText =
+            randomMessage;
+
+
+        work.classList.remove(
+            "shake"
+        );
+
+        void work.offsetWidth;
+
+        work.classList.add(
+            "shake"
+        );
+
+    }
+);
+
+
+/* =========================
+   창 크기 변경
+========================= */
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        if (
+            leave.style.position !==
+            "fixed"
+        ) {
+            return;
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
