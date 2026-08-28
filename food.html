@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>오늘 저녁 뭐 먹지?</title>
+
+<style>
+    body {
+        text-align: center;
+        background: #fff4df;
+        font-family: sans-serif;
+    }
+
+    h1 {
+        margin-top: 50px;
+        color: #ff6b35;
+    }
+
+    p {
+        font-size: 18px;
+    }
+
+    .card {
+        width: 280px;
+        height: 380px;
+        margin: 40px auto;
+        cursor: pointer;
+        perspective: 1000px;
+    }
+
+    .card-inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+    }
+
+    .card.open .card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .front, .back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        backface-visibility: hidden;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        box-sizing: border-box;
+        padding: 25px;
+    }
+
+    .front {
+        background: linear-gradient(135deg, #ff6b6b, #ff9f43);
+        color: white;
+        font-size: 32px;
+        font-weight: bold;
+    }
+
+    .front span {
+        font-size: 70px;
+        margin-bottom: 20px;
+    }
+
+    .back {
+        background: white;
+        color: #333;
+        transform: rotateY(180deg);
+    }
+
+    .back .emoji {
+        font-size: 80px;
+        margin-bottom: 20px;
+    }
+
+    .back .menu {
+        font-size: 30px;
+        font-weight: bold;
+        color: #ff6b35;
+    }
+
+    .back .comment {
+        margin-top: 15px;
+        font-size: 16px;
+        color: #777;
+    }
+
+    .hint {
+        color: #888;
+        font-size: 14px;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🍽️ 오늘 저녁 뭐 먹지?</h1>
+
+<p>고민하지 말고 카드를 뽑아보세요!</p>
+
+<div class="card" onclick="drawMenu()" id="card">
+
+    <div class="card-inner">
+
+        <!-- 카드 앞면 -->
+        <div class="front">
+            <span>🎴</span>
+            오늘의<br>저녁 메뉴
+        </div>
+
+        <!-- 카드 뒷면 -->
+        <div class="back">
+            <div class="emoji" id="emoji">🍚</div>
+            <div class="menu" id="menu">메뉴</div>
+            <div class="comment" id="comment">오늘은 이거다!</div>
+        </div>
+
+    </div>
+
+</div>
+
+<p class="hint">👆 카드를 눌러주세요</p>
+<p class="hint">다시 누르면 새로운 메뉴가 나옵니다!</p>
+
+
+<script>
+
+const menus = [
+    {
+        name: "치킨",
+        emoji: "🍗",
+        comment: "오늘은 치킨이다. 반박은 받지 않습니다."
+    },
+    {
+        name: "피자",
+        emoji: "🍕",
+        comment: "콜라까지 시키면 완벽합니다."
+    },
+    {
+        name: "삼겹살",
+        emoji: "🥓",
+        comment: "오늘은 고기 먹는 날!"
+    },
+    {
+        name: "떡볶이",
+        emoji: "🌶️",
+        comment: "맵지만 맛있으면 됐죠."
+    },
+    {
+        name: "초밥",
+        emoji: "🍣",
+        comment: "오늘 저녁은 고급스럽게 가봅니다."
+    },
+    {
+        name: "햄버거",
+        emoji: "🍔",
+        comment: "감자튀김도 잊지 마세요."
+    },
+    {
+        name: "라면",
+        emoji: "🍜",
+        comment: "귀찮을 땐 역시 라면."
+    },
+    {
+        name: "김치찌개",
+        emoji: "🍲",
+        comment: "밥 두 공기 각입니다."
+    },
+    {
+        name: "돈까스",
+        emoji: "🥩",
+        comment: "바삭함이 필요한 날."
+    },
+    {
+        name: "냉면",
+        emoji: "🍜",
+        comment: "시원하게 한 그릇 갑시다."
+    },
+    {
+        name: "족발",
+        emoji: "🍖",
+        comment: "오늘은 야식까지 책임집니다."
+    },
+    {
+        name: "국밥",
+        emoji: "🍲",
+        comment: "역시 든든한 국밥."
+    },
+    {
+        name: "파스타",
+        emoji: "🍝",
+        comment: "오늘은 분위기 있게!"
+    },
+    {
+        name: "닭발",
+        emoji: "🌶️",
+        comment: "매운맛으로 스트레스 날려버리기!"
+    },
+    {
+        name: "김밥",
+        emoji: "🍙",
+        comment: "간단하지만 맛있습니다."
+    }
+];
+
+let isOpen = false;
+
+function drawMenu() {
+
+    const card = document.getElementById("card");
+
+    // 카드가 이미 열려 있다면 닫기
+    if (isOpen) {
+        card.classList.remove("open");
+        isOpen = false;
+
+        // 잠깐 기다렸다가 새로운 메뉴 준비
+        setTimeout(() => {
+            showRandomMenu();
+        }, 300);
+
+    } else {
+        // 처음 누르면 랜덤 메뉴 보여주기
+        showRandomMenu();
+        card.classList.add("open");
+        isOpen = true;
+    }
+}
+
+function showRandomMenu() {
+
+    const randomIndex = Math.floor(Math.random() * menus.length);
+    const selected = menus[randomIndex];
+
+    document.getElementById("emoji").innerText = selected.emoji;
+    document.getElementById("menu").innerText = selected.name;
+    document.getElementById("comment").innerText = selected.comment;
+}
+
+</script>
+
+</body>
+</html>
